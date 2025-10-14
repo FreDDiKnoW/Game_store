@@ -7,8 +7,8 @@ logger = logging.getLogger(__name__)
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    # Додаємо поле для повторного вводу пароля, воно не зберігається в базі
     password2 = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    email = serializers.EmailField(required=True)
 
     class Meta:
         model = User
@@ -21,7 +21,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Паролі не збігаються."})
+            raise serializers.ValidationError({"password": "Passwords must match."})
 
         try:
             validate_password(attrs['password'])
@@ -32,9 +32,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password2')
-
         user = User.objects.create_user(**validated_data)
-
-        logger.info(f"Створено нового користувача: {user.username}")
-
+        logger.info(f"Created new user - {user.username} ({user.email})")
         return user
