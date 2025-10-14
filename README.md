@@ -1,5 +1,5 @@
 # GameStore — Online PC Games Store
-
+## Frontend - https://github.com/FreDDiKnoW/Game_store-FrontEND
 GameStore is a simple online store for PC video games. The site allows users to browse and search games, view detailed game pages, browse developers and publishers, register and log in, maintain a personal profile with order history, store games in a cart, and place simplified orders (no payment step in this phase). The project will be a single repository containing a backend REST API (e.g., Django REST Framework / FastAPI / Express) and a separate frontend client.
 
 ## Major features (scope for initial weeks)
