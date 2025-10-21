@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db.models import ProtectedError
+from rest_framework.permissions import IsAdminUser, AllowAny
 
 from .models import Game, Developer, Genre
 from .serializers import (
@@ -71,6 +72,11 @@ class GenreList(APIView):
 
 
 class GameList(APIView):
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAdminUser()]
+        return [AllowAny()]
+
     def get(self, request):
         games = Game.objects.all()
         serializer = GameListSerializer(games, many=True)
@@ -86,6 +92,11 @@ class GameList(APIView):
 
 
 class GameDetail(APIView):
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [IsAdminUser()]
+        return [AllowAny()]
+
     def get(self, request, pk):
         game = get_object_or_404(Game, pk=pk)
         serializer = GameDetailSerializer(game)
@@ -94,6 +105,15 @@ class GameDetail(APIView):
     def put(self, request, pk):
         game = get_object_or_404(Game, pk=pk)
         serializer = GameCreateUpdateSerializer(game, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            detail_serializer = GameDetailSerializer(serializer.instance)
+            return Response(detail_serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        game = get_object_or_404(Game, pk=pk)
+        serializer = GameCreateUpdateSerializer(game, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             detail_serializer = GameDetailSerializer(serializer.instance)
